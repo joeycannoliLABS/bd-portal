@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avalanche — Business Development</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E84142;
+    --red-hover: #FF5556;
+    --red-dim: rgba(232, 65, 66, 0.15);
+    --red-glow: rgba(232, 65, 66, 0.08);
+    --bg: #0B0E11;
+    --bg-raised: #12161B;
+    --bg-card: #161B22;
+    --bg-card-hover: #1C2128;
+    --border: rgba(255,255,255,0.06);
+    --border-light: rgba(255,255,255,0.04);
+    --border-hover: rgba(232,65,66,0.25);
+    --text: #E6EDF3;
+    --text-secondary: #8B949E;
+    --text-muted: #484F58;
+    --green: #3FB950;
+    --green-dim: rgba(63,185,80,0.12);
+    --blue: #58A6FF;
+    --blue-dim: rgba(88,166,255,0.12);
+    --purple: #BC8CFF;
+    --purple-dim: rgba(188,140,255,0.12);
+    --yellow: #D29922;
+    --yellow-dim: rgba(210,153,34,0.12);
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+    --radius: 12px;
+    --sidebar-w: 280px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg-raised);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 0 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sidebar-logo svg { height: 26px; width: auto; flex-shrink: 0; }
+
+  .sidebar-logo .divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  .sidebar-logo .title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+  }
+
+  .sidebar-logo .title span {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .sidebar-section { margin-top: 0; }
+
+  .sidebar-heading {
+    padding: 0 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+
+  .nav-group { margin-bottom: 1px; }
+
+  .nav-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: left;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-toggle:hover {
+    background: var(--red-glow);
+    border-left-color: var(--red);
+  }
+
+  .nav-toggle .chevron {
+    width: 14px; height: 14px; flex-shrink: 0;
+    transition: transform 0.2s;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .nav-toggle[aria-expanded="true"] .chevron { transform: rotate(90deg); color: var(--red); }
+
+  .nav-toggle .icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+  .nav-toggle:hover .icon { color: var(--red); }
+
+  .nav-children {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.25s ease;
+  }
+
+  .nav-children.open { max-height: 500px; }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px 6px 48px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--text);
+    background: var(--red-glow);
+    border-left-color: rgba(232,65,66,0.4);
+  }
+
+  .nav-link .ext {
+    width: 11px; height: 11px;
+    opacity: 0; transition: opacity 0.15s;
+    color: var(--text-muted);
+    flex-shrink: 0; margin-left: auto;
+  }
+
+  .nav-link:hover .ext { opacity: 1; }
+
+  .nav-link.disabled {
+    color: var(--text-muted);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .nav-link.disabled::after {
+    content: 'Soon';
+    font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px;
+    margin-left: auto;
+  }
+
+  .nav-item-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item-link:hover {
+    background: var(--red-glow);
+    border-left-color: var(--red);
+  }
+
+  .nav-item-link .icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--text-secondary); }
+  .nav-item-link:hover .icon { color: var(--red); }
+
+  .nav-item-link .ext {
+    width: 11px; height: 11px;
+    opacity: 0; transition: opacity 0.15s;
+    color: var(--text-muted);
+    flex-shrink: 0; margin-left: auto;
+  }
+
+  .nav-item-link:hover .ext { opacity: 1; }
+
+  .nav-sub-heading {
+    padding: 16px 20px 6px 20px;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text-muted);
+  }
+
+  .nav-resource {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 20px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-resource:hover {
+    color: var(--text);
+    background: var(--red-glow);
+    border-left-color: rgba(232,65,66,0.4);
+  }
+
+  .nav-resource .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .nav-resource:hover .dot { background: var(--red); }
+
+  .nav-resource .ext {
+    width: 11px; height: 11px;
+    opacity: 0; transition: opacity 0.15s;
+    color: var(--text-muted);
+    flex-shrink: 0; margin-left: auto;
+  }
+
+  .nav-resource:hover .ext { opacity: 1; }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 48px 56px;
+    max-width: 1000px;
+  }
+
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-header h1 .badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--red);
+    background: var(--red-dim);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(232,65,66,0.2);
+  }
+
+  .page-header .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Quick-access cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .q-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .q-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--red);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .q-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+  }
+
+  .q-card:hover::before { opacity: 1; }
+
+  .q-card .card-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    font-size: 17px;
+  }
+
+  .q-card:nth-child(1) .card-icon { background: var(--red-dim); }
+  .q-card:nth-child(2) .card-icon { background: var(--blue-dim); }
+  .q-card:nth-child(3) .card-icon { background: var(--green-dim); }
+  .q-card:nth-child(4) .card-icon { background: var(--purple-dim); }
+
+  .q-card h3 {
+    font-size: 14px; font-weight: 700;
+    margin-bottom: 4px; letter-spacing: -0.2px;
+    color: var(--text);
+  }
+
+  .q-card p {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .q-card .arrow {
+    position: absolute;
+    top: 24px; right: 24px;
+    width: 16px; height: 16px;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: all 0.2s;
+    transform: translate(-4px, 4px);
+  }
+
+  .q-card:hover .arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+    color: var(--red);
+  }
+
+  /* Section styling */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+
+  .info-card p {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .info-card p strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-text {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .footer-brand .red { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 260 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M161.362 225.858H247.382C254.972 225.858 259.722 217.638 255.922 211.068L212.912 136.578C209.112 130.008 199.632 130.008 195.832 136.578L152.822 211.068C149.022 217.638 153.772 225.858 161.362 225.858Z" fill="#E84142"/>
+        <path d="M172.122 65.9274L136.772 4.68742C133.202 -1.50258 124.262 -1.50258 120.692 4.68742L1.80155 210.607C-2.10845 217.387 2.78155 225.847 10.6015 225.847H81.3915C88.9415 225.847 95.9115 221.817 99.6815 215.287L172.122 89.8174C176.392 82.4274 176.392 73.3174 172.122 65.9274Z" fill="#E84142"/>
+      </svg>
+      <div class="divider"></div>
+      <div class="title">
+        Business Development
+        <span>Ecosystem Growth</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Budget</div>
+
+      <!-- EG Tracker Sheets -->
+      <div class="nav-group">
+        <button class="nav-toggle" aria-expanded="false" onclick="toggleNav(this)">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          EG Tracker Sheets
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="nav-children">
+          <a class="nav-link" href="https://docs.google.com/spreadsheets/d/1AUoUUygXbiCgh0ZVrqyMN32qeTgAUmE9S2YvNFSptqc/edit?gid=1332334617#gid=1332334617" target="_blank">
+            2024 EG Tracker
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+          <a class="nav-link" href="https://docs.google.com/spreadsheets/d/1LtaRWNsXcsFJilOtSYKzM3heXsqV0kpdOxiEuB8zyLI/edit?gid=0#gid=0" target="_blank">
+            2025 EG Tracker
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+          <a class="nav-link" href="https://docs.google.com/spreadsheets/d/1r2KYRVfZielr6nSKy6ROs4ezPBzZuEMloyK7aYCA1A4/edit?gid=0#gid=0" target="_blank">
+            2026 EG Tracker
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Progress Tracker -->
+      <div class="nav-group">
+        <button class="nav-toggle" aria-expanded="false" onclick="toggleNav(this)">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Progress Tracker
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="nav-children">
+          <a class="nav-link" href="dashboard-2025.html">
+            2025 Dashboard
+          </a>
+          <a class="nav-link disabled" href="#">
+            2026 Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- Deal Template -->
+      <a class="nav-item-link" href="https://docs.google.com/document/d/1IhC1iNoPw32MN9z5L5xs64f000fGhOChntwN_bOnXog/edit?tab=t.0" target="_blank">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Deal Template
+        <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+
+      <!-- Resources -->
+      <div class="nav-sub-heading">Resources</div>
+
+      <a class="nav-resource" href="https://build.avax.network/grants" target="_blank">
+        <span class="dot"></span>
+        Avalanche Grants
+        <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+      <a class="nav-resource" href="https://avaxatlas.com/dashboard/investor" target="_blank">
+        <span class="dot"></span>
+        Avax Atlas
+        <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+      <a class="nav-resource" href="https://docs.google.com/document/d/10--lGXYU3mzzAKZdLK1eQ38_dm_NACEVFMsuFMISNcs/edit?tab=t.0#heading=h.nbjo3bxew8g0" target="_blank">
+        <span class="dot"></span>
+        Strategy
+        <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main">
+    <div class="page-header">
+      <h1>
+        Business Development
+        <span class="badge">Internal</span>
+      </h1>
+      <p class="subtitle">Central hub for the Avalanche Ecosystem Growth team — trackers, dashboards, templates, and resources.</p>
+    </div>
+
+    <div class="card-grid">
+      <a class="q-card" href="https://docs.google.com/spreadsheets/d/1LtaRWNsXcsFJilOtSYKzM3heXsqV0kpdOxiEuB8zyLI/edit?gid=0#gid=0" target="_blank">
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div class="card-icon">📊</div>
+        <h3>2025 EG Tracker</h3>
+        <p>Active budget tracker with all current deals, milestones, and funding data.</p>
+      </a>
+      <a class="q-card" href="dashboard-2025.html">
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <div class="card-icon">📈</div>
+        <h3>2025 Dashboard</h3>
+        <p>Visual overview of deal status, pipeline health, and milestone progress.</p>
+      </a>
+      <a class="q-card" href="https://build.avax.network/grants" target="_blank">
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div class="card-icon">🏗️</div>
+        <h3>Avalanche Grants</h3>
+        <p>Grant programs for builders deploying on Avalanche.</p>
+      </a>
+      <a class="q-card" href="https://docs.google.com/document/d/1IhC1iNoPw32MN9z5L5xs64f000fGhOChntwN_bOnXog/edit?tab=t.0" target="_blank">
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div class="card-icon">📋</div>
+        <h3>Deal Template</h3>
+        <p>Standard template for structuring new partnership proposals.</p>
+      </a>
+    </div>
+
+    <div class="section-label">Getting Started</div>
+    <div class="info-card">
+      <p>Use the sidebar to navigate between trackers, dashboards, and resources. The <strong>EG Tracker Sheets</strong> contain all deal data by year — update your deals monthly at minimum. The <strong>Progress Tracker</strong> dashboards are generated from that data and shared with the executive team. Refer to the <strong>Deal Template</strong> when structuring new partnerships, and check <strong>Resources</strong> for grants, analytics, and strategy docs.</p>
+    </div>
+
+    <div class="footer">
+      <div class="footer-text">Avalanche Ecosystem Growth</div>
+      <div class="footer-brand"><span class="red">AVAX</span> Business Development</div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+function toggleNav(btn) {
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', !expanded);
+  btn.nextElementSibling.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>
